@@ -43,7 +43,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         }
     }
 
-    static Date s_lastDate;
+
 
     final static int LED_NOTIFICATION_ID = 0;
     public static final void cancelNotification(NotificationManager nm) {
@@ -61,7 +61,9 @@ public class AlarmReceiver extends BroadcastReceiver {
         private final Boolean mShouldShowInToolbar;
         private final NotificationManager mNotificationManager;
         private final Context mCtx;
-
+        private final SharedPreferences mSettings;
+        private Date mLastDate;
+        private final String LAST_RECEIVED = "lastRcvd";
 
         CheckMailTask(SharedPreferences settings, NotificationManager nm, Context ctx) {
             mCtx = ctx;
@@ -70,6 +72,8 @@ public class AlarmReceiver extends BroadcastReceiver {
             mServer = settings.getString(SetupActivity.SERVER_SETTING, "");
             mShouldVibrate = settings.getBoolean(SetupActivity.VIBRATE_SETTING, false);
             mShouldShowInToolbar = settings.getBoolean(SetupActivity.N_AREA_SETTING, true);
+            mLastDate = new Date(settings.getLong(LAST_RECEIVED, 0));
+            mSettings = settings;
 
             try {
                 mEmail = new InternetAddress(settings.getString(SetupActivity.EMAIL_SETTING, ""));
@@ -110,8 +114,10 @@ public class AlarmReceiver extends BroadcastReceiver {
                                     Date receivedDate =  msg.getReceivedDate();
                                     if (receivedDate == null) receivedDate = new Date(); //Sorry, you need to actually read the email in this case
 
-                                    if (s_lastDate == null || s_lastDate.before(receivedDate)) {
-                                        s_lastDate = receivedDate;
+                                    if (mLastDate == null || mLastDate.before(receivedDate)) {
+                                        mLastDate = receivedDate;
+                                        SharedPreferences.Editor editor = mSettings.edit();
+                                        editor.putLong(LAST_RECEIVED, mLastDate.getTime());
                                         setNotitication();
                                     }
                                     //else - Notification already there, it might be removed by user, so do nothing.
