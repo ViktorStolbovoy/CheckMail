@@ -101,18 +101,20 @@ public class AlarmReceiver extends BroadcastReceiver {
                 // search for all "unseen" messages
                 int unread = 0;
                 int total = inbox.getMessageCount();
-                final int CHECK_DEPTH = 50;
+                final int CHECK_DEPTH = 20;
                 final int last = total > CHECK_DEPTH ? total - CHECK_DEPTH : 1;
                 for (int i = total; i >= last; i--) {
                     try {
                         Message msg = inbox.getMessage(i);
 
-                        if (!msg.isSet(Flags.Flag.SEEN)) {
-                            for (Address address : msg.getFrom()) {
-                                if (address.equals(mEmail)) {
+
+                        for (Address address : msg.getFrom()) {
+                            if (address.equals(mEmail)) {
+                                if (!msg.isSet(Flags.Flag.SEEN)) {
                                     //Going from the end, so the last email should come first
-                                    Date receivedDate =  msg.getReceivedDate();
-                                    if (receivedDate == null) receivedDate = new Date(); //Sorry, you need to actually read the email in this case
+                                    Date receivedDate = msg.getReceivedDate();
+                                    if (receivedDate == null)
+                                        receivedDate = new Date(); //Sorry, you need to actually read the email in this case
 
                                     if (mLastDate == null || mLastDate.before(receivedDate)) {
                                         mLastDate = receivedDate;
@@ -124,7 +126,14 @@ public class AlarmReceiver extends BroadcastReceiver {
                                     inbox.close(false);
                                     store.close();
                                     return true;
+                                } else {
+                                    //The last email is read
+                                    cancelNotification();
+                                    inbox.close(false);
+                                    store.close();
+                                    return false;
                                 }
+
                             }
                         }
                     } catch (Exception me) {

@@ -1,21 +1,39 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'Main'
+            keyPassword 'Download#1'
+            storeFile file('D:/Prj/AndroidStudioProjects/main1.jks')
+            storePassword 'Download#1'
+        }
+    }
     compileSdkVersion 23
     buildToolsVersion "23.0.3"
-
     defaultConfig {
         applicationId "com.viktorstolbovoy.checkmail"
         minSdkVersion 16
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+        testApplicationId '1'
+        signingConfig signingConfigs.config
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        debug {
+            debuggable true
+            jniDebuggable true
+            signingConfig signingConfigs.config
+            applicationIdSuffix '1'
+            versionNameSuffix '1'
+        }
+    }
+    productFlavors {
     }
 }
 
@@ -24,5 +42,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'com.android.support:design:23.4.0'
-    compile group: 'javax.mail', name: 'mail', version: '1.4'
+    compile 'javax.mail:mail:1.4'
 }
